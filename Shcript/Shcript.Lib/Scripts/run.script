@@ -1,0 +1,17 @@
+﻿//	<Function>
+string runbatch(string file) 
+{
+	var sb = new System.Text.StringBuilder();
+    var process = new System.Diagnostics.Process();
+    var startinfo = new System.Diagnostics.ProcessStartInfo("cmd.exe", @"/C " + file);
+    startinfo.RedirectStandardOutput = true;
+    startinfo.UseShellExecute = false;
+    process.StartInfo = startinfo;
+    process.OutputDataReceived += (sender, args) => sb.Append(args.Data);
+    process.Start();
+    process.BeginOutputReadLine();
+    process.WaitForExit();
+
+	return sb.ToString();
+}
+//	</Function>

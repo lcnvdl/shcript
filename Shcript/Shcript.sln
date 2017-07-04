@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shcript.UI", "Shcript.UI\Shcript.UI.csproj", "{B9F1AD26-4B7E-4422-B81D-A1BD146D1FA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shcript.Lib", "Shcript.Lib\Shcript.Lib.csproj", "{34077AA1-23CC-4DFA-AF88-4EE206FF16BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shcript.Tests", "Shcript.Tests\Shcript.Tests.csproj", "{6CF01E9F-8E08-4C4D-9AAC-33EF510AEC3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B9F1AD26-4B7E-4422-B81D-A1BD146D1FA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9F1AD26-4B7E-4422-B81D-A1BD146D1FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9F1AD26-4B7E-4422-B81D-A1BD146D1FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9F1AD26-4B7E-4422-B81D-A1BD146D1FA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34077AA1-23CC-4DFA-AF88-4EE206FF16BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34077AA1-23CC-4DFA-AF88-4EE206FF16BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34077AA1-23CC-4DFA-AF88-4EE206FF16BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34077AA1-23CC-4DFA-AF88-4EE206FF16BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CF01E9F-8E08-4C4D-9AAC-33EF510AEC3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CF01E9F-8E08-4C4D-9AAC-33EF510AEC3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CF01E9F-8E08-4C4D-9AAC-33EF510AEC3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CF01E9F-8E08-4C4D-9AAC-33EF510AEC3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
