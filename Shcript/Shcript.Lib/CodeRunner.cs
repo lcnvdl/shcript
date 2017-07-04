@@ -56,6 +56,7 @@ namespace Shcript.Lib
             {
                 printText("---------------------");
                 printText("Parsed script:");
+                printText("---------------------");
                 printText(code);
                 printText("---------------------");
             }
@@ -117,9 +118,10 @@ namespace Shcript.Lib
             //  Add the script class if does not exists
             if (isScript && !Regex.IsMatch(code, scriptClassRgx))
             {
-                outSb.AppendLine("public class Script { public void Main(System.Action<string> print, System.Action<string> printError) {");
+                outSb.AppendLine("public class Script {");
+                outSb.AppendLine("public void Main(System.Action<string> print, System.Action<string> printError) {");
                 outSb.AppendLine(code);
-                outSb.AppendLine("}}");
+                outSb.AppendLine("} }");
             }
             else
             {
@@ -134,13 +136,20 @@ namespace Shcript.Lib
                 Match begin = Regex.Match(code, beginRgx);
                 if (begin.Success)
                 {
-                    Match main = Regex.Matches(code, mainRgx).Cast<Match>().OrderBy(m => m.Index).First(m => m.Index > begin.Index);
-
+                    var main = Regex.Matches(code, mainRgx).Cast<Match>().OrderBy(m => m.Index).First(m => m.Index > begin.Index);
+                    var sb = new StringBuilder();
+                    sb.AppendLine();
                     foreach (var info in infos)
                     {
-                        //  Imported Functions
-                        code = code.Insert(main.Index - 1, string.Join("\n", info.Functions));
+                        foreach(var fn in info.Functions)
+                        {
+                            sb.AppendLine(fn);
+                        }
+
+                        sb.AppendLine();
                     }
+
+                    code = code.Insert(main.Index - 1, sb.ToString());
                 }
             }
 
