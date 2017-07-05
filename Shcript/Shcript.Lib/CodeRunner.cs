@@ -1,12 +1,12 @@
 ﻿using Microsoft.CSharp;
-using Shcript.Lib.Internal;
+using Shcript.Lib.Code;
+using Shcript.Lib.Constants;
+using Shcript.Lib.Helpers;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -14,10 +14,8 @@ namespace Shcript.Lib
 {
     public class CodeRunner
     {
-        private const string usingRgx = @"\busing\s+([a-zA-Z]+\s*=\s*)?[a-zA-Z.0-9]+\s*[\;]";
-        private const string beginRgx = @"(public\s+)?class\s+Script\s+{";
-        private const string mainRgx = @"(public\s+)?void\s+Main\s*\(\s*";
-        private const string scriptClassRgx = @"\bclass\s+Script\s*{";
+        #region Constants
+
         private static readonly string[] basicUsings = new string[] {
             "System",
             "System.Collections.Generic",
@@ -26,12 +24,24 @@ namespace Shcript.Lib
             "System.IO"
         };
 
+        #endregion
+
+        #region Properties
+
         public bool Verbose { get; set; }
+
+        #endregion
+
+        #region Ctor
 
         public CodeRunner()
         {
             Verbose = false;
         }
+
+        #endregion
+
+        #region Public methods
 
         public void RunFile(string file, Action<string> printText, Action<string> printError)
         {
@@ -116,7 +126,7 @@ namespace Shcript.Lib
             }
 
             //  Add the script class if does not exists
-            if (isScript && !Regex.IsMatch(code, scriptClassRgx))
+            if (isScript && !Regex.IsMatch(code, Rgx.Code.ScriptClass))
             {
                 outSb.AppendLine("public class Script {");
                 outSb.AppendLine("public void Main(System.Action<string> print, System.Action<string> printError) {");
@@ -133,10 +143,10 @@ namespace Shcript.Lib
 
             //  Add extra functions
             {
-                Match begin = Regex.Match(code, beginRgx);
+                Match begin = Regex.Match(code, Rgx.Code.Begin);
                 if (begin.Success)
                 {
-                    var main = Regex.Matches(code, mainRgx).Cast<Match>().OrderBy(m => m.Index).First(m => m.Index > begin.Index);
+                    var main = Regex.Matches(code, Rgx.Code.Main).Cast<Match>().OrderBy(m => m.Index).First(m => m.Index > begin.Index);
                     var sb = new StringBuilder();
                     sb.AppendLine();
                     foreach (var info in infos)
@@ -156,12 +166,22 @@ namespace Shcript.Lib
             return code;
         }
 
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        /// Extracts usings from a script, splitting it into a list (return) and the rest of code (out code).
+        /// </summary>
+        /// <param name="script"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         private List<string> ParseUsings(string script, out string code)
         {
             var usings = new List<string>();
             var lastMatch = 0;
 
-            foreach (Match match in Regex.Matches(script, usingRgx))
+            foreach (Match match in Regex.Matches(script, Rgx.Code.Using))
             {
                 usings.Add(match.Value);
                 if (lastMatch < match.Index + match.Length)
@@ -195,7 +215,7 @@ namespace Shcript.Lib
                 importLine = importLine.Substring(i).Trim();
                 string path = importLine.Remove(importLine.Length - 1).Substring(importLine.IndexOf(' ')).Trim();
 
-                string content = GetContent(path);
+                string content = FilesHelper.GetContent(path);
 
                 var info = new ImportInfo();
                 info.Analize(content);
@@ -219,7 +239,7 @@ namespace Shcript.Lib
                 importLine = importLine.Substring(i).Trim();
                 string path = importLine.Remove(importLine.Length - 1).Substring(importLine.IndexOf(' ')).Trim();
 
-                string content = GetContent(path);
+                string content = FilesHelper.GetContent(path);
 
                 code = code.Replace(importLine, content);
             }
@@ -242,48 +262,6 @@ namespace Shcript.Lib
             }
         }
 
-        private string GetContent(string path)
-        {
-            string content;
-            if (path.StartsWith("http://"))
-            {
-                content = DownloadText(path);
-            }
-            else if (path.Contains("\\") || !path.EndsWith(".script") && path.Contains("."))
-            {
-                content = File.ReadAllText(path);
-            }
-            else
-            {
-                content = ReadEmbebbed(path);
-            }
-
-            return content;
-        }
-
-        private string ReadEmbebbed(string path)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "Shcript.Lib.Scripts." + path.ToLower();
-
-            if (!resourceName.EndsWith(".script"))
-            {
-                resourceName += ".script";
-            }
-
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
-        }
-
-        private string DownloadText(string url)
-        {
-            using (WebClient client = new WebClient())
-            {
-                return client.DownloadString(url);
-            }
-        }
+        #endregion
     }
 }

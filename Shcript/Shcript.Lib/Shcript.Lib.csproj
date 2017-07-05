@@ -51,7 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeRunner.cs" />
-    <Compile Include="Internal\ImportInfo.cs" />
+    <Compile Include="Constants\Rgx.cs" />
+    <Compile Include="Helpers\FilesHelper.cs" />
+    <Compile Include="Code\ImportInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
