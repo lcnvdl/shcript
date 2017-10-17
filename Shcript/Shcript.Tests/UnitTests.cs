@@ -68,6 +68,28 @@ namespace Shcript.Tests
         }
 
         [TestMethod]
+        public void ScriptWithArguments()
+        {
+            var cr = new CodeRunner();
+            var output = "";
+            var args = new System.Collections.Generic.List<string>()
+            {
+                "Test",
+                "Test2"
+            };
+            cr.Run("foreach(var arg in arguments) print(arg);", t =>
+            {
+                output += t;
+            }, e =>
+            {
+                throw new Exception(e);
+            }, args);
+
+            Assert.IsTrue(output.Length > 0);
+            Assert.AreEqual("TestTest2", output);
+        }
+
+        [TestMethod]
         public void ScriptWithUsings()
         {
             Assert.Inconclusive();

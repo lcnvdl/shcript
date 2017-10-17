@@ -1,5 +1,6 @@
 ﻿using Shcript.Lib;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Shcript.UI
@@ -10,12 +11,20 @@ namespace Shcript.UI
         {
             string file = string.Empty;
             bool verbose = false;
+            List<string> scriptArguments = new List<string>();
 
             for (int i = 0; i < args.Length; i++)
             {
                 var cmd = args[i].ToLower();
                 switch (cmd)
                 {
+                    case "-a":
+                    case "--argument":
+                        {
+                            scriptArguments.Add(args[++i]);
+                        }
+                        break;
+
                     case "-v":
                     case "--verbose":
                         {
@@ -58,7 +67,7 @@ namespace Shcript.UI
 
             try
             {
-                cr.RunFile(file, log => Console.WriteLine(log), err => { Console.WriteLine(err); error = true; });
+                cr.RunFile(file, log => Console.WriteLine(log), err => { Console.WriteLine(err); error = true; }, scriptArguments);
             }
             catch (Exception ex)
             {

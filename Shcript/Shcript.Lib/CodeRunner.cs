@@ -20,6 +20,7 @@ namespace Shcript.Lib
             "System",
             "System.Collections.Generic",
             "System.Text",
+            "System.Text.RegularExpressions",
             "System.Linq",
             "System.IO"
         };
@@ -43,12 +44,12 @@ namespace Shcript.Lib
 
         #region Public methods
 
-        public void RunFile(string file, Action<string> printText, Action<string> printError)
+        public void RunFile(string file, Action<string> printText, Action<string> printError, List<string> arguments)
         {
-            Run(File.ReadAllText(file), printText, printError);
+            Run(File.ReadAllText(file), printText, printError, arguments);
         }
 
-        public void Run(string script, Action<string> printText, Action<string> printError)
+        public void Run(string script, Action<string> printText, Action<string> printError, List<string> arguments = null)
         {
             var provider = CSharpCodeProvider.CreateProvider("CSharp", new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
 
@@ -83,7 +84,14 @@ namespace Shcript.Lib
 
             var o = results.CompiledAssembly.CreateInstance("Script");
             var mi = o.GetType().GetMethod("Main");
-            mi.Invoke(o, new object[] { printText, printError });
+            if (mi.GetParameters().Length == 2)
+            {
+                mi.Invoke(o, new object[] { printText, printError });
+            }
+            else
+            {
+                mi.Invoke(o, new object[] { printText, printError, (arguments ?? new List<string>()).ToArray() });
+            }
         }
 
         public string ParseScript(string script, bool isScript = true)
@@ -124,12 +132,12 @@ namespace Shcript.Lib
             {
                 outSb.AppendLine(@using);
             }
-
+            
             //  Add the script class if does not exists
             if (isScript && !Regex.IsMatch(code, Rgx.Code.ScriptClass))
             {
                 outSb.AppendLine("public class Script {");
-                outSb.AppendLine("public void Main(System.Action<string> print, System.Action<string> printError) {");
+                outSb.AppendLine("public void Main(System.Action<string> print, System.Action<string> printError, string[] arguments) {");
                 outSb.AppendLine(code);
                 outSb.AppendLine("} }");
             }
