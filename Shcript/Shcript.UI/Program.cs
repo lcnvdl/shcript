@@ -57,12 +57,91 @@ namespace Shcript.UI
                 }
             }
 
-            if (string.IsNullOrEmpty(file))
-                return;
-
+            var console = string.IsNullOrEmpty(file);
             var cr = new CodeRunner();
             cr.Verbose = verbose;
 
+            bool error = console ? RunConsole(cr, scriptArguments) : RunFile(cr, scriptArguments, file);
+
+            Environment.Exit(error ? 0 : 1);
+        }
+
+        private static bool RunConsole(CodeRunner cr, List<string> scriptArguments)
+        {
+            bool error = false;
+            bool exit = false;
+
+            List<string> accumulator = new List<string>();
+
+            while (!exit)
+            {
+                Console.Write("Shcript> ");
+
+                string line = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(line) || ParseInternalCommands(line, ref exit))
+                    continue;
+
+                while (line.Trim().EndsWith("\\"))
+                {
+                    accumulator.Add(line.Remove(line.LastIndexOf('\\')));
+                    line = Console.ReadLine();
+                }
+
+                if (accumulator.Count > 0)
+                {
+                    accumulator.Add(line);
+                    line = string.Join(Environment.NewLine, accumulator);
+                    accumulator.Clear();
+                }
+                else
+                {
+                    if (!line.Trim().EndsWith(";"))
+                        line += ";";
+                }
+
+                try
+                {
+                    cr.Run(line, log => Console.WriteLine(log), err => { Console.WriteLine(err); error = true; }, scriptArguments);
+                }
+                catch (Exception ex)
+                {
+                    error = true;
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+
+            Console.WriteLine("Closed" + (error ? " with error" : ""));
+
+            return error;
+        }
+
+        private static bool ParseInternalCommands(string line, ref bool exit)
+        {
+            bool result = true;
+
+            switch (line.ToLower().Trim())
+            {
+                case "exit":
+                    exit = true;
+                    break;
+
+                case "cls":
+                case "clear":
+                case "clean":
+                    Console.Clear();
+                    break;
+
+                default:
+                    result = false;
+                    break;
+            }
+
+            return result;
+        }
+
+        private static bool RunFile(CodeRunner cr, List<string> scriptArguments, string file)
+        {
             bool error = false;
 
             try
@@ -75,7 +154,7 @@ namespace Shcript.UI
                 Console.WriteLine(ex.ToString());
             }
 
-            Environment.Exit(error ? 0 : 1);
+            return error;
         }
     }
 }

@@ -1,0 +1,104 @@
+﻿//	<Class>
+        class ThreadClass
+        {
+            static object locker = new object();
+            static Dictionary<string, System.Threading.Thread> threads = new Dictionary<string, System.Threading.Thread>();
+
+	        public static void Each(Action<string, System.Threading.Thread> doX) 
+	        {
+                List<string> keys = new List<string>();
+		        lock(locker) {
+                    foreach (string key in threads.Keys)
+                    {
+                        keys.Add(key);
+                    }
+		        }
+
+                foreach (string key in keys)
+                {
+                    System.Threading.Thread t = Get(key);
+                    if (t != null)
+                    {
+                        doX(key, t);
+                    }
+                }
+	        }
+
+            public static System.Threading.Thread Add(string id, Action a)
+            {
+                var thread = new System.Threading.Thread(() =>
+                {
+                    a();
+                    Remove(id);
+                });
+
+                lock (locker)
+                {
+                    threads[id] = thread;
+                }
+
+                return thread;
+            }
+
+            public static System.Threading.Thread Get(string id)
+            {
+                System.Threading.Thread t;
+                if (!threads.TryGetValue(id, out t))
+                {
+                    return null;
+                }
+                return t;
+            }
+
+            public static void Remove(string id)
+            {
+                lock (locker)
+                {
+                    threads.Remove(id);
+                }
+            }
+        }
+        //	</Class>
+        //	<Function>
+        string addThread(Action action)
+        {
+            string id = System.Guid.NewGuid().ToString();
+            ThreadClass.Add(id, action);
+            return id;
+        }
+        string addRunThread(Action action)
+        {
+            string id = System.Guid.NewGuid().ToString();
+            ThreadClass.Add(id, action).Start();
+            return id;
+        }
+        void runThread(string id)
+        {
+            System.Threading.Thread t = ThreadClass.Get(id);
+            if (t != null)
+            {
+                t.Start();
+            }
+        }
+        void waitThreads()
+        {
+            ThreadClass.Each((id, t) => t.Join());
+        }
+        void waitThread(string id)
+        {
+            System.Threading.Thread t = ThreadClass.Get(id);
+            if (t != null)
+            {
+                t.Join();
+            }
+        }
+        void killThread(string id)
+        {
+            System.Threading.Thread t = ThreadClass.Get(id);
+            if (t != null)
+            {
+                t.Abort();
+                ThreadClass.Remove(id);
+            }
+        }
+        //	</Function>

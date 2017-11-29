@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shcript.Lib;
+using System.Text;
 
 namespace Shcript.Tests
 {
@@ -36,7 +37,7 @@ namespace Shcript.Tests
         }
 
         [TestMethod]
-        public void IncludeEmbedded()
+        public void IncludeEmbedded_RunScript_Ok()
         {
             var cr = new CodeRunner();
             var output = "";
@@ -52,7 +53,24 @@ namespace Shcript.Tests
         }
 
         [TestMethod]
-        public void ImportEmbedded()
+        public void IncludeEmbedded_ThreadScript_Ok()
+        {
+            var cr = new CodeRunner();
+            var output = "";
+            cr.Run("class Script { include Thread; public void Main(Action<string> print, object b) { var t = addRunThread(()=>print(\"Hilo!\")); waitThread(t); } }", t =>
+            {
+                output += t;
+            }, e =>
+            {
+                throw new Exception(e);
+            });
+
+            Assert.IsTrue(output.Length > 0);
+            Assert.AreEqual("Hilo!", output);
+        }
+
+        [TestMethod]
+        public void ImportEmbedded_RunScript_Ok()
         {
             var cr = new CodeRunner();
             var output = "";
@@ -65,6 +83,50 @@ namespace Shcript.Tests
             });
 
             Assert.IsTrue(output.Length > 0);
+        }
+
+        [TestMethod]
+        public void ImportEmbedded_ThreadScript_Ok()
+        {
+            var cr = new CodeRunner();
+            var output = "";
+            cr.Run("import Thread; class Script { public void Main(Action<string> print, object b) { var t = addRunThread(()=>print(\"Hilo!\")); waitThread(t); } }", t =>
+            {
+                output += t;
+            }, e =>
+            {
+                throw new Exception(e);
+            });
+
+            Assert.IsTrue(output.Length > 0);
+            Assert.AreEqual("Hilo!", output);
+        }
+
+        [TestMethod]
+        public void ImportEmbedded_ThreadScript_B_Ok()
+        {
+            var cr = new CodeRunner();
+            var output = "";
+            var thread = "addRunThread(()=>{{ int i = 0; while(i++<10){{print(\"{0}\");System.Threading.Thread.Sleep(10);}} }}); ";
+            var sb = new StringBuilder();
+            sb.Append("import Thread; class Script { public void Main(Action<string> print, object b) { ");
+            sb.AppendFormat(thread, 1);
+            sb.AppendFormat(thread, 2);
+            sb.AppendFormat(thread, 3);
+            sb.Append(" waitThreads(); } }");
+
+            cr.Run(sb.ToString(), t =>
+            {
+                output += t;
+            }, e =>
+            {
+                throw new Exception(e);
+            });
+
+            Assert.IsTrue(output.Length > 0);
+            Assert.IsTrue(output.Contains("1"));
+            Assert.IsTrue(output.Contains("2"));
+            Assert.IsTrue(output.Contains("3"));
         }
 
         [TestMethod]

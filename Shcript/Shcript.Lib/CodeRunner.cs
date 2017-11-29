@@ -121,9 +121,16 @@ namespace Shcript.Lib
                 }
 
                 //  Imported classes
-                foreach (var @class in info.Classes)
+                if (info.Classes.Count > 0)
                 {
-                    code = "\n" + @class + "\n" + code;
+                    var classesCode = new StringBuilder();
+
+                    foreach (var @class in info.Classes)
+                    {
+                        classesCode.AppendLine(@class);
+                    }
+
+                    code = classesCode.ToString() + code;
                 }
             }
 
